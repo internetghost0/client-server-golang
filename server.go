@@ -36,8 +36,8 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	if strings.ToLower(nick) == "server" {
+		sendConn(conn, "Server: You cannot use this nickname\n")
 		conn.Close()
-		sendConn(conn, "Server: You cannot use this nickname")
 		return
 	}
 	if len(nick) > 64 {
