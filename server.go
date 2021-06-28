@@ -31,7 +31,6 @@ func main() {
 }
 
 func handleConnection(conn net.Conn) {
-
 	nick, err := recvConn(conn)
 	if err != nil {
 		return
@@ -47,6 +46,7 @@ func handleConnection(conn net.Conn) {
 	nick = strings.ReplaceAll(nick, " ", "_")
 
 	Connections[conn] = nick
+	sendEveryoneExcept(nil, "Hello to server!\n")
 	sendConn(conn, "Server: your nickname is `"+Connections[conn]+"`")
 	sendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
 	for {
