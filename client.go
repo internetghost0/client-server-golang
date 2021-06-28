@@ -19,7 +19,7 @@ func main() {
 		panic("error to connect")
 	}
 	defer conn.Close()
-	sendConn(conn, input("your nick: "))
+	conn.Write([]byte(input("your nick: ") + END_BYTES))
 	for {
 		go clientOutput(conn)
 		clientInput(conn)
@@ -28,7 +28,7 @@ func main() {
 
 func clientInput(conn net.Conn) {
 	for {
-		sendConn(conn, input(""))
+		conn.Write([]byte(input("") + END_BYTES))
 	}
 }
 
@@ -69,8 +69,4 @@ func recvConn(conn net.Conn) (string, error) {
 		}
 	}
 	return message, nil
-}
-
-func sendConn(conn net.Conn, message string) (int, error) {
-	return conn.Write([]byte(message + END_BYTES))
 }

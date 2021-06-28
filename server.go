@@ -36,7 +36,7 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	if strings.ToLower(nick) == "server" {
-		sendConn(conn, "Server: you cannot use this nickname\n")
+		conn.Write([]byte("Server: you cannot use this nickname\n" + END_BYTES))
 		conn.Close()
 		return
 	}
@@ -48,7 +48,7 @@ func handleConnection(conn net.Conn) {
 
 	for c := range Connections {
 		if nick == Connections[c] {
-			sendConn(conn, "Server: this nickname is already taken")
+			conn.Write([]byte("Server: this nickname is already taken" + END_BYTES))
 			conn.Close()
 			return
 		}
@@ -95,13 +95,10 @@ func recvConn(conn net.Conn) (string, error) {
 	return message, nil
 }
 
-func sendConn(conn net.Conn, message string) (int, error) {
-	return conn.Write([]byte(message + END_BYTES))
-}
 func sendEveryoneExcept(conn net.Conn, msg string) {
 	for c := range Connections {
 		if c != conn {
-			sendConn(c, msg)
+			c.Write([]byte(msg + END_BYTES))
 		}
 	}
 }
