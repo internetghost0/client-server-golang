@@ -34,7 +34,11 @@ func clientInput(conn net.Conn) {
 
 func clientOutput(conn net.Conn) {
 	for {
-		msg := recvConn(conn)
+		msg, err := recvConn(conn)
+		if err != nil {
+			fmt.Println("Disconnected from server")
+			os.Exit(0)
+		}
 		fmt.Println(msg)
 	}
 }
@@ -48,15 +52,15 @@ func input(msg string) string {
 
 }
 
-func recvConn(conn net.Conn) string {
+func recvConn(conn net.Conn) (string, error) {
 	var (
 		bytes   = make([]byte, 1024)
 		message = ""
 	)
 	for {
 		length, err := conn.Read(bytes)
-		if err != nil || length == 0 {
-			break
+		if err != nil {
+			return "nil", err
 		}
 		message += string(bytes[:length])
 		if strings.HasSuffix(message, END_BYTES) {
@@ -64,9 +68,9 @@ func recvConn(conn net.Conn) string {
 			break
 		}
 	}
-	return message
-
+	return message, nil
 }
+
 func sendConn(conn net.Conn, message string) (int, error) {
 	return conn.Write([]byte(message + END_BYTES))
 }
