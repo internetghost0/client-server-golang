@@ -32,13 +32,13 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 
-	nick, err := ConnRead(conn)
+	nick, err := recvConn(conn)
 	if err != nil {
 		return
 	}
 	if strings.ToLower(nick) == "server" {
 		conn.Close()
-		ConnWrite(conn, "Server: You cannot use this nickname")
+		sendConn(conn, "Server: You cannot use this nickname")
 		return
 	}
 	if len(nick) > 64 {
@@ -47,21 +47,21 @@ func handleConnection(conn net.Conn) {
 	nick = strings.ReplaceAll(nick, " ", "_")
 
 	Connections[conn] = nick
-	ConnWrite(conn, "Server: your nickname is `"+Connections[conn]+"`")
-	SendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
+	sendConn(conn, "Server: your nickname is `"+Connections[conn]+"`")
+	sendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
 	for {
-		msg, err := ConnRead(conn)
+		msg, err := recvConn(conn)
 		if err != nil {
-			SendEveryoneExcept(conn, "Server: user `"+Connections[conn]+"` has disconnected ")
+			sendEveryoneExcept(conn, "Server: user `"+Connections[conn]+"` has disconnected ")
 			break
 		}
-		SendEveryoneExcept(conn, Connections[conn]+": "+msg)
+		sendEveryoneExcept(conn, Connections[conn]+": "+msg)
 	}
 	delete(Connections, conn)
 
 }
 
-func ConnRead(conn net.Conn) (string, error) {
+func recvConn(conn net.Conn) (string, error) {
 	var (
 		bytes   = make([]byte, 1024)
 		message = ""
@@ -80,13 +80,13 @@ func ConnRead(conn net.Conn) (string, error) {
 	return message, nil
 }
 
-func ConnWrite(conn net.Conn, message string) (int, error) {
+func sendConn(conn net.Conn, message string) (int, error) {
 	return conn.Write([]byte(message + END_BYTES))
 }
-func SendEveryoneExcept(conn net.Conn, msg string) {
+func sendEveryoneExcept(conn net.Conn, msg string) {
 	for c := range Connections {
 		if c != conn {
-			ConnWrite(c, msg)
+			sendConn(c, msg)
 		}
 	}
 }

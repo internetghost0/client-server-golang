@@ -19,10 +19,10 @@ func main() {
 		panic("error to connect")
 	}
 	defer conn.Close()
-	ConnWrite(conn, input("your nick: "))
+	sendConn(conn, input("your nick: "))
 	for {
-		go ClientOutput(conn)
-		ClientInput(conn)
+		go clientOutput(conn)
+		clientInput(conn)
 	}
 
 	// bytes := make([]byte, 64)
@@ -31,15 +31,15 @@ func main() {
 
 }
 
-func ClientInput(conn net.Conn) {
+func clientInput(conn net.Conn) {
 	for {
-		ConnWrite(conn, input(""))
+		sendConn(conn, input(""))
 	}
 }
 
-func ClientOutput(conn net.Conn) {
+func clientOutput(conn net.Conn) {
 	for {
-		msg := ConnRead(conn)
+		msg := recvConn(conn)
 		fmt.Println(msg)
 	}
 }
@@ -53,7 +53,7 @@ func input(msg string) string {
 
 }
 
-func ConnRead(conn net.Conn) string {
+func recvConn(conn net.Conn) string {
 	var (
 		bytes   = make([]byte, 1024)
 		message = ""
@@ -72,6 +72,6 @@ func ConnRead(conn net.Conn) string {
 	return message
 
 }
-func ConnWrite(conn net.Conn, message string) (int, error) {
+func sendConn(conn net.Conn, message string) (int, error) {
 	return conn.Write([]byte(message + END_BYTES))
 }
