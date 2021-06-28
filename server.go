@@ -55,7 +55,7 @@ func handleConnection(conn net.Conn) {
 	}
 
 	Connections[conn] = nick
-	sendEveryoneExcept(nil, "Hello to server!\n")
+	sendEveryoneExcept("Hello to server!\n", nil)
 	conn.Write([]byte("Server: your nickname is `" + Connections[conn] + "`\n"))
 
 	conn.Write([]byte("Online users:\n"))
@@ -63,14 +63,14 @@ func handleConnection(conn net.Conn) {
 		conn.Write([]byte("   `" + Connections[c] + "`\n"))
 	}
 	conn.Write([]byte(END_BYTES))
-	sendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
+	sendEveryoneExcept("Server: new user `"+Connections[conn]+"` has connected", conn)
 	for {
 		msg, err := recvConn(conn)
 		if err != nil {
-			sendEveryoneExcept(conn, "Server: user `"+Connections[conn]+"` has disconnected ")
+			sendEveryoneExcept("Server: user `"+Connections[conn]+"` has disconnected ", conn)
 			break
 		}
-		sendEveryoneExcept(conn, Connections[conn]+": "+msg)
+		sendEveryoneExcept(Connections[conn]+": "+msg, conn)
 	}
 	delete(Connections, conn)
 
@@ -95,7 +95,7 @@ func recvConn(conn net.Conn) (string, error) {
 	return message, nil
 }
 
-func sendEveryoneExcept(conn net.Conn, msg string) {
+func sendEveryoneExcept(msg string, conn net.Conn) {
 	for c := range Connections {
 		if c != conn {
 			c.Write([]byte(msg + END_BYTES))
