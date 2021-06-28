@@ -24,11 +24,6 @@ func main() {
 		go clientOutput(conn)
 		clientInput(conn)
 	}
-
-	// bytes := make([]byte, 64)
-	// length, err := conn.Read(bytes)
-	// fmt.Printf("%v\n", string(bytes[:length]))
-
 }
 
 func clientInput(conn net.Conn) {
