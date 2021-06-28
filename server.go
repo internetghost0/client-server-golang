@@ -17,7 +17,7 @@ const (
 func main() {
 	listener, err := net.Listen("tcp6", ADDR)
 	if err != nil {
-		panic("server error")
+		panic("the ip-address is already taken")
 	}
 	for {
 		conn, err := listener.Accept()
@@ -36,7 +36,7 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	if strings.ToLower(nick) == "server" {
-		sendConn(conn, "Server: You cannot use this nickname\n")
+		sendConn(conn, "Server: you cannot use this nickname\n")
 		conn.Close()
 		return
 	}
@@ -45,6 +45,14 @@ func handleConnection(conn net.Conn) {
 	}
 	nick = strings.ReplaceAll(nick, " ", "_")
 	nick = strings.ReplaceAll(nick, "`", "_")
+
+	for c := range Connections {
+		if nick == Connections[c] {
+			sendConn(conn, "Server: this nickname is already taken")
+			conn.Close()
+			return
+		}
+	}
 
 	Connections[conn] = nick
 	sendEveryoneExcept(nil, "Hello to server!\n")
