@@ -24,7 +24,6 @@ func main() {
 		if err != nil {
 			continue
 		}
-
 		go handleConnection(conn)
 
 	}
@@ -37,17 +36,26 @@ func handleConnection(conn net.Conn) {
 	if err != nil {
 		return
 	}
+	if strings.ToLower(nick) == "server" {
+		conn.Close()
+		ConnWrite(conn, "Server: You cannot use this nickname")
+		return
+	}
+	if len(nick) > 64 {
+		nick = nick[:64]
+	}
+	nick = strings.ReplaceAll(nick, " ", "_")
+
 	Connections[conn] = nick
+	ConnWrite(conn, "Server: your nickname is `"+Connections[conn]+"`")
+	SendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
 	for {
 		msg, err := ConnRead(conn)
 		if err != nil {
+			SendEveryoneExcept(conn, "Server: user `"+Connections[conn]+"` has disconnected ")
 			break
 		}
-		for c := range Connections {
-			if c != conn {
-				ConnWrite(c, Connections[c]+": "+msg)
-			}
-		}
+		SendEveryoneExcept(conn, Connections[conn]+": "+msg)
 	}
 	delete(Connections, conn)
 
@@ -74,4 +82,11 @@ func ConnRead(conn net.Conn) (string, error) {
 
 func ConnWrite(conn net.Conn, message string) (int, error) {
 	return conn.Write([]byte(message + END_BYTES))
+}
+func SendEveryoneExcept(conn net.Conn, msg string) {
+	for c := range Connections {
+		if c != conn {
+			ConnWrite(c, msg)
+		}
+	}
 }
