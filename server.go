@@ -44,10 +44,17 @@ func handleConnection(conn net.Conn) {
 		nick = nick[:64]
 	}
 	nick = strings.ReplaceAll(nick, " ", "_")
+	nick = strings.ReplaceAll(nick, "`", "_")
 
 	Connections[conn] = nick
 	sendEveryoneExcept(nil, "Hello to server!\n")
-	sendConn(conn, "Server: your nickname is `"+Connections[conn]+"`")
+	conn.Write([]byte("Server: your nickname is `" + Connections[conn] + "`\n"))
+
+	conn.Write([]byte("Online users:\n"))
+	for c := range Connections {
+		conn.Write([]byte("   `" + Connections[c] + "`\n"))
+	}
+	conn.Write([]byte(END_BYTES))
 	sendEveryoneExcept(conn, "Server: new user `"+Connections[conn]+"` has connected")
 	for {
 		msg, err := recvConn(conn)
