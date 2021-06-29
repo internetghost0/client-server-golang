@@ -55,13 +55,14 @@ func handleConnection(conn net.Conn) {
 	}
 
 	Connections[conn] = nick
-	sendEveryoneExcept("Hello to server!\n", nil)
+
 	conn.Write([]byte("Server: your nickname is `" + Connections[conn] + "`\n"))
 
 	conn.Write([]byte("Online users:\n"))
 	for c := range Connections {
 		conn.Write([]byte("   `" + Connections[c] + "`\n"))
 	}
+	conn.Write([]byte("Server: Hello to server!"))
 	conn.Write([]byte(END_BYTES))
 	sendEveryoneExcept("Server: new user `"+Connections[conn]+"` has connected", conn)
 	for {
